@@ -54,7 +54,6 @@ class Exam(QWidget, form_window):
         self.lbl_recommendation.setText(recommendation)
         print('debug02')
 
-
     def recommendation_by_keyword(self, key_word):
         try:
             sim_word = self.embedding_model.wv.most_similar(key_word, topn=50)
@@ -65,35 +64,19 @@ class Exam(QWidget, form_window):
         keyword_restaurants = []
         keyword_counts = {}  # 음식점별 키워드 발견 횟수 저장
 
-        for word, _ in sim_word:
+        for word, _ in sim_word: # 주어진 키워드와 유사한 단어를 찾아냅니다.
             # 키워드와 유사한 단어가 들어간 리뷰를 찾아서 해당 음식점들을 리스트에 추가
             restaurants = self.df_reviews[self.df_reviews['reviews'].str.contains(word)]['names'].tolist()
+            # 리스트에는 각 유사한 단어가 나타난 리뷰에서 얻은 음식점 목록이 저장됩니다.
             keyword_restaurants.extend(restaurants)
 
             # 유사한 단어들을 터미널에서 출력
             print(f"키워드 '{key_word}'와 유사한 단어: {word}")
-        #
-        # # 음식점 이름이 중복되면 리뷰의 갯수를 합쳐서 하나로 묶어서 출력
-        # for restaurant in set(restaurants):
-        #     reviews_for_restaurant = self.df_reviews[
-        #         (self.df_reviews['names'] == restaurant) & (self.df_reviews['reviews'].str.contains(word))]
-        #     total_reviews_count = reviews_for_restaurant.shape[0]
-        #     total_keyword_count = reviews_for_restaurant['reviews'].apply(lambda review: review.count(word)).sum()
-        #
-        #         # 음식점별 키워드 발견 횟수 저장
-        #     if restaurant not in keyword_counts:
-        #         keyword_counts[restaurant] = total_keyword_count
-        #     else:
-        #         keyword_counts[restaurant] += total_keyword_count
-        #
-        #     print(f"음식점 '{restaurant}' 전체 리뷰 수: {total_reviews_count}, '{word}' 발견 횟수: {total_keyword_count}")
 
-        # 입력한 키워드가 몇 번 등장했는지 출력
-        keyword_count = len(sim_word)
-        print(f"\n'{key_word}'가 리뷰에서 찾은 유사한 단어 수: {keyword_count}")
 
         # 음식점 리스트에서 키워드가 많이 언급된 순서대로 정렬
         sorted_restaurants = sorted(keyword_counts.keys(), key=lambda x: keyword_counts[x], reverse=True)
+        # 음식점 리스트를 키워드가 많이 언급된 순서대로 정렬하고, 상위 10개의 음식점을 선택하여 출력합니다.
 
         # 상위 10개 추천
         recommendation_restaurants = sorted_restaurants[:10]
@@ -105,7 +88,7 @@ class Exam(QWidget, form_window):
         print(f"\n키워드 '{key_word}'와 관련된 음식점 추천:")
         print(recommendation)
 
-        return recommendation, keyword_count
+        return recommendation, len(recommendation_restaurants)
 
     def recommendation_by_movie_title(self, title):
         movie_idx = self.df_reviews[self.df_reviews['names'] == title].index[0]
@@ -145,6 +128,5 @@ if __name__ == '__main__':
     mainWindow = Exam()
     mainWindow.show()
     sys.exit(app.exec_())
-
 
 
